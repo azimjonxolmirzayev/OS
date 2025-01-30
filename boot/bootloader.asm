@@ -1,19 +1,32 @@
-; bootloader.asm - oddiy bootloader
-bits 16          ; 16-bit rejimda ishlash
-org 0x7c00       ; Bootloaderning boshlanish manzili
+; bootloader.asm - Oddiy bootloader + klaviaturani o‘qish
+bits 16
+org 0x7c00
 
-mov ah, 0x0E     ; Ekranga chiqarish uchun xizmat qiladi (BIOS interrupt)
-mov al, 'H'      ; 'H' harfini chiqarish
-int 0x10         ; BIOS interrupt
-mov al, 'e'      ; 'e' harfini chiqarish
-int 0x10
-mov al, 'l'      ; 'l' harfini chiqarish
-int 0x10
-mov al, 'l'      ; 'l' harfini chiqarish
-int 0x10
-mov al, 'o'      ; 'o' harfini chiqarish
-int 0x10
+start:
+    ; Ekranga "Hello" ni chiqarish
+    mov ah, 0x0E
+    mov al, 'H'
+    int 0x10
+    mov al, 'e'
+    int 0x10
+    mov al, 'l'
+    int 0x10
+    mov al, 'l'
+    int 0x10
+    mov al, 'o'
+    int 0x10
 
-jmp $            ; To'xtamasdan ishlash
-times 510 - ($ - $$) db 0 ; Faylning qolgan qismi 0 bilan to'ldiriladi
-dw 0xAA55        ; Bootloaderni bootable qilish uchun
+keyboard_loop:
+    ; Klaviaturadan belgi kiritilishini kutish
+    mov ah, 0x00
+    int 0x16   ; BIOS keyboard interrupt
+    
+    ; O‘qilgan belgini ekranga chiqarish
+    mov ah, 0x0E
+    mov al, al  ; O‘qilgan belgi to‘g‘ridan-to‘g‘ri AL registrida bo‘ladi
+    int 0x10
+
+    jmp keyboard_loop  ; Davom etish
+
+times 510 - ($ - $$) db 0  ; Boot sektorni to'ldirish
+dw 0xAA55  ; Boot sektor signaturasi
